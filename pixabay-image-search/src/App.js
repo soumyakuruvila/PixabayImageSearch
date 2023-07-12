@@ -3,8 +3,9 @@ import axios from 'axios';
 import * as Keys from './data/Keys.js';
 import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
+import { Box, TextField, InputAdornment, IconButton } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import SearchIcon from '@mui/icons-material/Search';
 import "./index.css";
 
 const Item = styled(Paper)(({ theme }) => ({
@@ -17,29 +18,48 @@ const Item = styled(Paper)(({ theme }) => ({
 
 function App() {
   const key = Keys.API_KEY;
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
 
-  const handleSearch = async () => {
-    try {
-      const response = await axios.get(`https://pixabay.com/api/?key=${key}&q=${searchTerm}&image_type=photo`);
-      setSearchResults(response.data.hits);
-      console.log(response.data)
-    } catch (error) {
-      console.error('Error fetching search results:', error);
-    }
+  var [searchTerm, setSearchTerm] = useState('');
+  var [searchResults, setSearchResults] = useState([]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+  };
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    setSearchTerm(e.target.value);
+  };
+
+  function handleSearch(e) {
+    e.preventDefault();
+    axios.get(`https://pixabay.com/api/?key=${key}&q=${searchTerm}&image_type=photo`)
+        .then(function (response) {
+            setSearchResults(response.data.hits);
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
   };
 
   return (
     <div>
+    <form onSubmit={handleSearch}>
       <h1>Pixabay Search Engine</h1>
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Enter search term"
+      <TextField placeholder="Enter search term" onChange={handleChange}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment>
+            <button>
+              <IconButton>
+                <SearchIcon />
+              </IconButton>
+              </button>
+            </InputAdornment>
+          )
+        }}
       />
-      <button onClick={handleSearch}>Search</button>
+    </form>
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
           {searchResults.map((result) => (
